@@ -1,97 +1,8 @@
 import { Image } from '@mdx-deck/components'
 
-# Peer to Peer Web
+# Dat and the peer-to-peer web
 
----
-
-# The traditional web
-
-* Client / Server architecture
-* High investment to run, low investement to use
-* Access via thin clients & APIs
-* Data silos
-* Tendency to centralize
-
----
-
-# Network architectures
-
-<img src="/assets/networks.png" />
-
-* Client / Server
-* Decentralized
-* Distributed
-
----
-
-# The peer to peer web
-
-How would things look if there were no servers?
-
----
-
-* Overcome client / server architecture
-* Dumb servers, intelligent (thick) clients
-* Hackable
-* Resilient
-
----
-
-# Problems (1)
-
-* It's hard to connect computers
-* IP addresses are scarse
-* The internet wasn't built for P2P
-
----
-
-# Problems (2)
-
-* Mutable state is hard to synchronize
-* Most websites and services are powered by databases
-* Most databases are not good at synchronizing
-
----
-
-# How can this work, then?
-
-* p2p networking: DHTs & NAT hole punching
-* p2p data structures: Append-only logs
-
----
-
-# P2P networking
-
-Let's connect my computer to yours.
-
-* How do we find each other?
-* How can we establish a direct connection?
-
----
-
-Distributed Hash Table
-
-<img src="/assets/dht.png" />
-
----
-
-# P2P networking
-
-Let's connect my computer to yours.
-
-* How do we find each other?
-  * Distributed Hash Table
-  * Map topics to IPs/ports
-* How do we connect to each other?
-  * NAT holepunching
-
----
-
-# P2P data structures
-
-* Append-only logs
-
-<img src='/assets/appendonly.png' />
+## Hypercore, Hyperdrive, Kappa databases
 
 ---
 
@@ -101,21 +12,13 @@ A cryptographically secure append only log
 
 ---
 
-# Merkle trees
 
-<img src='/assets/merkle-trees.png' />
+# Hypercore
 
----
-
-# How hypercore works (1)
+- Signed log of messages
+- Single writer
 
 <img src='/assets/hypercore1.png' />
-
----
-
-# How hypercore works (2)
-
-<img src='/assets/hypercore2.png' />
 
 ---
 
@@ -125,25 +28,76 @@ A cryptographically secure append only log
 - Two hypercores per hyperdrive:
     * metadata: trie-based key-value store
     * content: actual file content
+- Single writer
+- FUSE support
 
 ---
 
 # Hyperdrive
 
-- "Dropbox without servers"
-- Single-writer
-- FUSE & mounts
+```
+hypercore (content)
+hypercore (metadata)
+  hypertrie
+    hyperdrive
+```
+
+## hypertrie
+
+```
+0: (key, value, trieBuffer)
+1: (key, value, trieBuffer)
+2: (key, value, trieBuffer)
+```
+
+Allows to fetch "current state" first
+
 
 ---
 
-# Databases
+# Kappa databases
+
+"Event sourcing"
+
+Process a log of messages and build secondary indexes
 
 ---
 
-# Dat vs Blockhain
+# Kappa databases
 
-Dat: Like git and bittorrent
+## kappa-core
 
-Dat has no "shared global state"
+```
+hypercore KEY
+hypercore KEY
 
-Blockhains are, as Dat, based on merkle trees and append-only logs. A blockchain has *one* global log. Much of the effort is related to managing that single log concurrently.
+  multifeed DISCOVERY_KEY
+
+    multifeed-index
+     
+      kappa-core
+
+        view (map)
+```
+
+- "Open by default"
+- Very simple architecture
+
+---
+
+# Kappa databases
+
+### Challenges
+
+- History is not free
+- Unordered delivery of messages
+- Managing adding/removing sources
+
+---
+
+### Kappa on top of hypertrie/hyperdrive
+
+- Use trie structure to fetch present before history
+- Manage both records and files
+
+---
